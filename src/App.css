@@ -1,38 +1,444 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100&display=swap');
+
+/* Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #121212; /* Dark background for contrast */
+    font-family: 'Roboto Mono', monospace; /* Consistent monospace font */
+    color: #ffffff; /* Bright text for readability */
+}
+
+/* App Styles */
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    text-align: center;
+    background: linear-gradient(to bottom, #000000, #121212); /* Subtle gradient */
+    min-height: 100vh;
+    padding: 2rem 1rem; /* Give some space around the content */
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    margin-bottom: 1rem; /* Add space below the header */
 }
 
-.App-link {
-  color: #61dafb;
+.title {
+    font-family: 'Press Start 2P', cursive; /* Retro gaming font */
+    color: #ff4500; /* Magma color */
+    text-shadow: none;
+    padding: 1rem;
+    padding-bottom: 40px;
+    margin: 0 auto; /* Center the title */
+    display: inline-block; /* Allows the shadow to wrap tightly around the text */
+    font-size: 2.5rem; /* Larger font size for emphasis */
+    animation: neon 1.5s ease-in-out infinite alternate; /* Neon flickering effect */
 }
 
-@keyframes App-logo-spin {
+@keyframes neon {
   from {
-    transform: rotate(0deg);
+    text-shadow: 
+        0 0 10px #000000, 
+        0 0 20px #f06d06, 
+        0 0 30px #f06d06, 
+        0 0 40px #000000, 
+        0 0 70px #000000, 
+        0 0 80px #f06d06, 
+        0 0 100px #000000, 
+        0 0 150px #000000;
   }
   to {
-    transform: rotate(360deg);
+    text-shadow: 
+        0 0 5px #000000, 
+        0 0 10px #000000, 
+        0 0 15px #f06d06, 
+        0 0 20px #f06d06, 
+        0 0 35px #f06d06, 
+        0 0 40px #f06d06, 
+        0 0 50px #000000, 
+        0 0 75px #000000;
   }
+}
+
+.hero-image-container {
+    max-width: 70%; /* Same width as your image */
+    margin: 0 auto 1rem; /* Center container and provide space below */
+    position: relative; /* For positioning the pseudo-element */
+    border-radius: 15px; /* Optional: if you want rounded corners */
+    overflow: hidden; /* Ensures the overlay conforms to the border-radius */
+    padding-top: 20px;
+  }
+  
+/* Pseudo-element for overlay */
+.hero-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 1) 100%);
+    pointer-events: none; /* Allows clicks to pass through to the image/link underneath */
+}
+  
+.hero-image {
+    width: 100%; /* Makes the image fill the container */
+    height: auto; /* Maintain aspect ratio */
+    display: block; /* Block display to fit the width */
+}
+  
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .title {
+        font-family: 'Press Start 2P', cursive; /* Retro gaming font */
+        color: #ff4500; /* Magma color */
+        text-shadow: none;
+        padding: 1rem;
+        padding-bottom: 40px;
+        margin: 0 auto; /* Center the title */
+        display: inline-block; /* Allows the shadow to wrap tightly around the text */
+        font-size: 1.9rem; /* Larger font size for emphasis */
+        animation: neon 1.5s ease-in-out infinite alternate; /* Neon flickering effect */
+    }
+
+    .hero-image {
+      width: 100%; /* Increase width to 90% on smaller screens */
+    }
+
+    .hero-image-container {
+        width: 90%; /* Increase width to 90% on smaller screens */
+        max-width: 90%; /* Same width as your image */
+    }
+      
+    .hero-image-container::after {
+        /* Adjust the radial gradient for smaller screens if necessary */
+        background: radial-gradient(ellipse at center, transparent 20%, rgba(0, 0, 0, 0.6) 80%);
+    }
+
+    .account-info {
+        color: #ff4500; /* Magma color for text */
+        text-shadow: 0 0 4px #ff4500;
+        margin-bottom: 1rem;
+        display: flex;
+        font-size: 14px;
+        margin-top: -20px;
+    }
+
+    .select {
+        font-size: 1rem; /* Larger font size for better readability on mobile */
+        padding: 0.5rem; /* Add padding to increase the height */
+    }
+
+    /* Style the option elements inside the select dropdown */
+    .select option {
+        font-size: 4rem; /* Larger font size for better readability */
+    }
+
+    .nft-list {
+        grid-template-columns: repeat(auto-fit, 250px); /* Adjust for a fixed size */
+        justify-content: center; /* Center grid items */
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem; /* Increase gap size */
+    }
+
+    .nft-item {
+        /* Ensure the items take up the specified width */
+        width: 250px;
+        margin: 0 auto; /* Center each item individually */
+        background-color: #222222;
+        border-radius: 0.8rem;
+        overflow: hidden;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        display: flex;
+        flex: 0 0 300px;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+}
+
+.main-content {
+    max-width: 960px; /* Max width for the content */
+    margin: 0 auto; /* Center content horizontally */
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 2px 2px 4px #000000;
+}
+
+.subtitle {
+    color: #ff4500; /* Magma color for text */
+    text-shadow: none;
+    margin-bottom: 1rem;
+}
+
+.account-info {
+    color: #ff4500; /* Magma color for text */
+    text-shadow: 0 0 4px #ff4500;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    display: flex;
+}
+
+.total-nfts {
+    color: #ffffff; /* or any color that matches your theme */
+    margin-bottom: 0.5rem; /* Space above the text */
+    font-size: 1rem; /* Adjust the font size as needed */
+}
+
+.max-mints-info {
+    color: #ffffff; /* or any color that matches your theme */
+    margin-top: 0.5rem; /* Space above the text */
+    font-size: 1rem; /* Adjust the font size as needed */
+}
+
+.mint-price-info {
+    color: #ffffff; /* or any color that matches your theme */
+    margin-top: 0.5rem; /* Space above the text */
+    font-size: 1rem; /* Adjust the font size as needed */
+}
+
+.contract-info {
+    color: #ff4500; /* Magma color */
+    margin-bottom: 1rem;
+    text-shadow: 0 0 4px #ff4500;
+    margin-top: 0.8rem;
+    font-size: 0.9rem; /* Smaller font size for secondary information */
+}
+
+.select {
+    border: 2px solid #ff4500; /* Magma color for borders */
+    background-color: transparent; /* Style selects and buttons consistently */
+    color: #ff4500; /* Magma color for text */
+    padding: 0.5rem 0.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem; /* Rounded corners for a modern look */
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive; /* Keep the retro gaming font */
+}
+
+.button {
+    border: 2px solid #ff4500; /* Magma color for borders */
+    background-color: transparent; /* Style selects and buttons consistently */
+    color: #ff4500; /* Magma color for text */
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem; /* Rounded corners for a modern look */
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive; /* Keep the retro gaming font */
+}
+
+.select:hover,
+.button:hover {
+    background-color: #ff4500; /* Magma color for hover */
+    color: #000000;
+    outline: none;
+}
+
+.nft-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center; /* This will center the grid items */
+    padding-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+    .main-content {
+        max-width: 1200px; /* Set a maximum width for the content */
+        margin: 0 auto; /* Center the content container */
+    }
+    
+    .nft-list {
+        grid-template-columns: repeat(auto-fit, 250px); /* Adjust for a fixed size */
+        justify-content: center; /* Center grid items */
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem; /* Increase gap size */
+    }
+
+    .nft-item {
+        /* Ensure the items take up the specified width */
+        width: 200px;
+        margin: 0 auto; /* Center each item individually */
+        background-color: #222222;
+        border-radius: 0.8rem;
+        overflow: hidden;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        flex: 0 0 200px;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-image-container {
+        max-width: 55%; /* Adjust the max-width for larger screens */
+    }
+}
+
+.nft-item {
+    /* Ensure the items take up the specified width */
+    width: 250px;
+    margin: 0 auto; /* Center each item individually */
+    background-color: #222222;
+    border-radius: 0.8rem;
+    overflow: hidden;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    display: flex;
+    flex: 0 0 300px;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.nft-item:hover {
+    transform: scale(1.05);
+    box-shadow: 
+      0 0 5px #ff4500, /* Innermost shadow with a soft glow */
+      0 0 10px #ff4500, /* Middle shadow for a stronger glow */
+      0 0 15px #ff4500;
+}
+
+.nft-image {
+    max-width: 100%; /* Ensure images are responsive */
+    height: auto; /* Maintain aspect ratio */
+    margin-bottom: 1rem; /* Space below the image */
+    cursor: pointer;
+}
+
+.metadata {
+    font-size: 1rem; /* Smaller font size for metadata */
+    text-align: center; /* Align text to the left for readability */
+    color: #ffffff; /* Adjust for better readability */
+    overflow: hidden; /* Ensures text doesn't overflow */
+}
+
+.no-nfts-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px; /* Set a specific height or adjust as needed */
+    width: 100%;
+}
+
+.no-nfts {
+    font-size: 1.2rem;
+    color: #ffffff;
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+.twitter-share-button {
+    display: inline-block;
+    background-color: #000000;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.twitter-share-button:hover {
+    background-color: #ff4500;
+    color: #000000;
+}
+
+
+.loader {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #ff4500; /* Magma color */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.overlay {
+    display: none; /* Hidden by default */
+    position: fixed; /* Overlay is positioned relative to the viewport */
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 10; /* Ensures overlay is above other content */
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay.active {
+    display: flex; /* Show overlay when active */
+}
+
+.Toastify__toast-container--top-center {
+    top: 1em; /* Adjust this value as needed */
+}
+
+@keyframes blink {
+    50% {
+      opacity: .3;
+    }
+}
+  
+.loading-dots span {
+    animation-name: blink;
+    animation-duration: 1.4s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+  
+.loading-dots span:nth-child(2) {
+    animation-delay: .2s;
+}
+  
+.loading-dots span:nth-child(3) {
+    animation-delay: .4s;
+}
+  
+.footer {
+    position: fixed; /* Keep footer fixed at the bottom */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2px;
+    background-color: rgba(10, 10, 10, 0.9);
+    text-align: center;
+    z-index: 2; /* Ensure the footer is above other content */
+}
+  
+.footer-links {
+    padding-bottom: 0;
+    padding-top: 40px;
+}
+  
+  /* Style links for learn more, etc. */
+.footer-links a {
+    color: #ff652f; /* Same neon color for links */
+    text-decoration: none; /* No underline for a cleaner look */
+    transition: color 0.3s ease-in-out;
+    margin-right: 20px; /* Adjust the spacing between links */
+}
+  
+.footer-links a:hover {
+    color: #ffb81f;
+}
+  
+  /* Style for link separators */
+.link-separator {
+    color: #ffffff; /* Adjust color as needed */
 }
