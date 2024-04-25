@@ -20,6 +20,10 @@ function App() {
     const notifySuccess = (message) => toast.success(message);
     const notifyError = (message) => toast.error(message);
 
+    useEffect(() => {
+        document.title = "8bit Wokeys"; // Set the title for your app
+    }, []);
+
     const checkNetwork = useCallback(async () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const { chainId } = await provider.getNetwork();
