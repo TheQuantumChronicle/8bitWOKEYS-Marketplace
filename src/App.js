@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import contractABI from './contractABI.json';
 import './App.css';
 
+
 function App() {
     const [account, setAccount] = useState(null);
     const [nftTokens, setNFTTokens] = useState([]);
@@ -163,7 +164,7 @@ function App() {
             {/* Conditionally render the hero image and certain containers based on whether NFTs are present */}
             {nftTokens.length === 0 && (
                 <div className="hero-image-container">
-                    <img src="/hero.png" alt="8bit WOKEYS Hero" className="hero-image" />
+                    <img src="/Hero.png" alt="8bit WOKEYS Hero" className="hero-image" />
                 </div>
             )}
             <div className="main-content">
