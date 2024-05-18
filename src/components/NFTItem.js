@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useMarketplace } from './useMarketplace';
 
-function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, makeOffer, buyNFT, listNFTForSale, cancelSale, transferNFT }) {
-  const { fetchHighestOffer, currentOffer, setCurrentOffer, acceptOffer, loading, setLoading, fetchIsListedForSale, fetchUpdatedData } = useMarketplace();
+function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, makeOffer, buyNFT, listNFTForSale, cancelSale, transferNFT, loading }) {
+  const { fetchHighestOffer, currentOffer, setCurrentOffer, acceptOffer, loading: marketplaceLoading, setLoading, fetchIsListedForSale, fetchUpdatedData } = useMarketplace();
   const [isListed, setIsListed] = useState(isListedForSale);
   const [listPrice, setListPrice] = useState(price || '');
   const [offerAmount, setOfferAmount] = useState('');
@@ -102,11 +102,14 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
       return;
     }
 
-    await handleTransaction(
+    const success = await handleTransaction(
       () => makeOffer(tokenId, parsedAmount.toString()),
       'Offer made successfully!',
       'Error making offer'
     );
+    if (success) {
+      fetchHighestOffer(tokenId); // Fetch the updated highest offer
+    }
   };
 
   const handleAcceptOffer = async () => {
@@ -164,10 +167,6 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
     }
   };
 
-  if (!metadata) {
-    return <div>Loading NFT data...</div>;
-  }
-
   const itemClassName = `nft-item ${currentOffer?.amount?.gt(0) ? 'has-offer' : ''} ${isListedForSale ? 'for-sale' : ''} ${isOwner ? 'owned' : ''}`;
 
   return (
@@ -178,54 +177,65 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
         </p>
       )}
       {isOwner && <p className="owned-message" style={{ color: 'red', fontSize: '1.2em', fontWeight: 'bold' }}>You own this NFT</p>}
+      {isListed && (
+        <p className="sale-price" style={{ fontWeight: 'bold' }}>
+          Sale Price: {price} ETH
+        </p>
+      )}
       <a href={`https://magmascan.org/token/0xA4F77aE2f6E33d1F4B6470BfAbF0fbD924525De1/instance/${tokenId}`} target="_blank" rel="noopener noreferrer">
-        <img src={imageUrl} alt={`NFT ${tokenId}: ${metadata.name}`} className="nft-image" onError={(e) => e.target.src = 'path_to_default_image.png'} />
+        <img src={imageUrl} alt={`NFT ${tokenId}: ${metadata?.name || 'NFT'}`} className="nft-image" onError={(e) => e.target.src = 'path_to_default_image.png'} />
       </a>
       <div className="metadata">
-        <h4>{metadata.name} #{tokenId}</h4>
-        <p>{metadata.description}</p>
-        {metadata.attributes.map((attribute, index) => (
-          <div key={index} className="attribute">{attribute.trait_type}: {attribute.value}</div>
-        ))}
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <h4>{metadata?.name || 'No Name'} #{tokenId}</h4>
+            <p>{metadata?.description || 'No Description'}</p>
+            {metadata?.attributes?.map((attribute, index) => (
+              <div key={index} className="attribute">{attribute.trait_type}: {attribute.value}</div>
+            ))}
+          </>
+        )}
       </div>
       <div className="actions">
         {isOwner ? (
           <>
             {isListed ? (
               <>
-                <button onClick={handleCancelSale} disabled={loading}>Cancel Sale</button>
+                <button onClick={handleCancelSale} disabled={marketplaceLoading}>Cancel Sale</button>
               </>
             ) : (
               <>
                 <form onSubmit={handleListForSale}>
-                  <input type="text" value={listPrice} onChange={(e) => setListPrice(e.target.value.replace(/[^0-9.]/g, ''))} disabled={loading} />
-                  <button type="submit" disabled={loading}>List for Sale</button>
+                  <input type="text" value={listPrice} onChange={(e) => setListPrice(e.target.value.replace(/[^0-9.]/g, ''))} disabled={marketplaceLoading} />
+                  <button type="submit" disabled={marketplaceLoading}>List for Sale</button>
                 </form>
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   handleTransferNFT();
                 }}>
-                  <input type="text" value={transferAddress} onChange={(e) => setTransferAddress(e.target.value)} placeholder="Enter recipient wallet address" required disabled={loading} />
-                  <button type="submit" disabled={loading}>Transfer NFT</button>
+                  <input type="text" value={transferAddress} onChange={(e) => setTransferAddress(e.target.value)} placeholder="Enter recipient wallet address" required disabled={marketplaceLoading} />
+                  <button type="submit" disabled={marketplaceLoading}>Transfer NFT</button>
                 </form>
               </>
             )}
             {currentOffer && currentOffer.amount && currentOffer.amount.gt(0) && (
-              <button onClick={handleAcceptOffer} disabled={loading}>Accept Offer</button>
+              <button onClick={handleAcceptOffer} disabled={marketplaceLoading}>Accept Offer</button>
             )}
           </>
         ) : isListed ? (
           <>
-            <button onClick={handleBuyNow} disabled={loading}>Buy Now for <span className="price-highlight">{listPrice} ETH</span></button>
+            <button onClick={handleBuyNow} disabled={marketplaceLoading}>Buy Now for <span className="price-highlight">{listPrice} ETH</span></button>
             <form onSubmit={handleMakeOffer}>
-              <input type="text" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} placeholder="Enter offer amount" disabled={loading} />
-              <button type="submit" disabled={loading}>Make Offer</button>
+              <input type="text" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} placeholder="Enter offer amount" disabled={marketplaceLoading} />
+              <button type="submit" disabled={marketplaceLoading}>Make Offer</button>
             </form>
           </>
         ) : (
           <form onSubmit={handleMakeOffer}>
-            <input type="text" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} placeholder="Enter offer amount" disabled={loading} />
-            <button type="submit" disabled={loading}>Make Offer</button>
+            <input type="text" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} placeholder="Enter offer amount" disabled={marketplaceLoading} />
+            <button type="submit" disabled={marketplaceLoading}>Make Offer</button>
           </form>
         )}
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
 import ConnectWallet from './components/ConnectWallet';
@@ -39,6 +39,7 @@ function App() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [nftsPerPage] = useState(25);
+  const fetchController = useRef(null);
 
   const displayedNFTs = useMemo(() => {
     const startIndex = (currentPage - 1) * nftsPerPage;
@@ -57,7 +58,14 @@ function App() {
     setCurrentPage(pageNumber);
   }, []);
 
+  const cancelOngoingFetch = () => {
+    if (fetchController.current) {
+      fetchController.current.abort();
+    }
+  };
+
   const handleShowAllNFTs = useCallback(async () => {
+    cancelOngoingFetch();
     if (!isCorrectNetwork) {
       notifyError('Incorrect network. Please switch to the Magma Testnet.');
       return;
@@ -66,14 +74,21 @@ function App() {
       notifyError('Please connect your wallet.');
       return;
     }
-    if (loading) return;
     setLoading(true);
+    fetchController.current = new AbortController();
+    const signal = fetchController.current.signal;
     try {
       const totalSupply = await nftContract.totalSupply();
-      let allMetadataPromises = [];
+      const allMetadataPromises = [];
+      const initialNFTs = [];
       for (let i = 1; i <= totalSupply.toNumber(); i++) {
-        allMetadataPromises.push(fetchMetadata(i.toString()));
+        const tokenId = i.toString();
+        initialNFTs.push({ tokenId, loading: true });
+        allMetadataPromises.push(fetchMetadata(tokenId, { signal }));
       }
+      setCurrentNFTs(initialNFTs);
+      setDisplayNFTs(initialNFTs);
+      
       const allMetadata = await Promise.all(allMetadataPromises);
       const validMetadata = allMetadata.filter(md => md);
 
@@ -90,20 +105,24 @@ function App() {
           isListedForSale: isListed,
           price: salePrice,
           isOwner,
-          canMakeOffer: !isOwner
+          canMakeOffer: !isOwner,
+          loading: false
         };
       });
 
       setCurrentNFTs(newNFTs);
       setDisplayNFTs(newNFTs);
     } catch (error) {
-      notifyError(`Error loading all NFTs: ${error.message}`);
+      if (error.name !== 'AbortError') {
+        notifyError(`Error loading all NFTs: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
-  }, [fetchMetadata, nftContract, fetchIsListedForSale, notifyError, loading, setCurrentNFTs, setDisplayNFTs, account, setLoading, isCorrectNetwork]);
+  }, [fetchMetadata, setLoading, nftContract, fetchIsListedForSale, notifyError, setCurrentNFTs, setDisplayNFTs, account, isCorrectNetwork]);
 
   const handleShowForSaleNFTs = useCallback(async () => {
+    cancelOngoingFetch();
     if (!isCorrectNetwork) {
       notifyError('Incorrect network. Please switch to the Magma Testnet.');
       return;
@@ -112,8 +131,9 @@ function App() {
       notifyError('Please connect your wallet.');
       return;
     }
-    if (loading) return;
     setLoading(true);
+    fetchController.current = new AbortController();
+    const signal = fetchController.current.signal;
     try {
       const forSaleNFTs = await getAllNFTsForSale();
       if (!forSaleNFTs || forSaleNFTs.length === 0) {
@@ -121,7 +141,11 @@ function App() {
         setLoading(false);
         return;
       }
-      const fetchMetadataPromises = forSaleNFTs.map(nft => fetchMetadata(nft.tokenId));
+      const initialNFTs = forSaleNFTs.map(nft => ({ tokenId: nft.tokenId, loading: true }));
+      setCurrentNFTs(initialNFTs);
+      setDisplayNFTs(initialNFTs);
+
+      const fetchMetadataPromises = forSaleNFTs.map(nft => fetchMetadata(nft.tokenId, { signal }));
       const fetchedMetadata = await Promise.all(fetchMetadataPromises);
       const nfts = forSaleNFTs.map((nft, index) => ({
         tokenId: nft.tokenId,
@@ -129,20 +153,24 @@ function App() {
         metadata: fetchedMetadata[index],
         isOwner: fetchedMetadata[index]?.owner === account,
         isListedForSale: true,
-        canMakeOffer: fetchedMetadata[index]?.owner !== account
+        canMakeOffer: fetchedMetadata[index]?.owner !== account,
+        loading: false
       }));
       setCurrentNFTs(nfts);
       setDisplayNFTs(nfts);
       handlePagination(1);
-      setLoading(false);
     } catch (error) {
-      console.error('Error fetching for-sale NFTs:', error);
-      toast.error('Failed to fetch NFTs for sale.');
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching for-sale NFTs:', error);
+        toast.error('Failed to fetch NFTs for sale.');
+      }
+    } finally {
       setLoading(false);
     }
-  }, [getAllNFTsForSale, fetchMetadata, account, handlePagination, setLoading, setDisplayNFTs, setCurrentNFTs, loading, isCorrectNetwork, notifyError]);
+  }, [getAllNFTsForSale, fetchMetadata, account, handlePagination, setLoading, setDisplayNFTs, setCurrentNFTs, isCorrectNetwork, notifyError]);
 
   const handleShowOwnedNFTs = useCallback(async () => {
+    cancelOngoingFetch();
     if (!isCorrectNetwork) {
       notifyError('Incorrect network. Please switch to the Magma Testnet.');
       return;
@@ -151,8 +179,9 @@ function App() {
       notifyError('Please connect your wallet.');
       return;
     }
-    if (loading) return;
     setLoading(true);
+    fetchController.current = new AbortController();
+    const signal = fetchController.current.signal;
     try {
       const ownedNFTIds = await fetchOwnedNFTs();
       if (!ownedNFTIds.length) {
@@ -162,7 +191,11 @@ function App() {
         setLoading(false);
         return;
       }
-      const fetchMetadataPromises = ownedNFTIds.map(nft => fetchMetadata(nft.tokenId));
+      const initialNFTs = ownedNFTIds.map(nft => ({ tokenId: nft.tokenId, loading: true }));
+      setCurrentNFTs(initialNFTs);
+      setDisplayNFTs(initialNFTs);
+
+      const fetchMetadataPromises = ownedNFTIds.map(nft => fetchMetadata(nft.tokenId, { signal }));
       const fetchedMetadata = await Promise.all(fetchMetadataPromises);
       const listedResults = await Promise.all(ownedNFTIds.map(nft => fetchIsListedForSale(nft.tokenId)));
       const nfts = ownedNFTIds.map((nft, index) => ({
@@ -170,17 +203,20 @@ function App() {
         isOwner: true,
         isListedForSale: listedResults[index].isListed,
         price: listedResults[index].salePrice,
-        metadata: fetchedMetadata[index]
+        metadata: fetchedMetadata[index],
+        loading: false
       }));
       setCurrentNFTs(nfts);
       setDisplayNFTs(nfts);
       handlePagination(1);
-      setLoading(false);
     } catch (error) {
-      toast.error(`Failed to fetch owned NFTs: ${error.message}`);
+      if (error.name !== 'AbortError') {
+        toast.error(`Failed to fetch owned NFTs: ${error.message}`);
+      }
+    } finally {
       setLoading(false);
     }
-  }, [fetchOwnedNFTs, account, fetchMetadata, fetchIsListedForSale, handlePagination, setCurrentNFTs, setDisplayNFTs, setLoading, loading, isCorrectNetwork, notifyError]);
+  }, [fetchOwnedNFTs, account, fetchMetadata, fetchIsListedForSale, handlePagination, setCurrentNFTs, setDisplayNFTs, setLoading, isCorrectNetwork, notifyError]);
 
   useEffect(() => {
     if (window.ethereum && !account && !loading) {
@@ -200,24 +236,47 @@ function App() {
     <div className="App">
       <ToastContainerComponent />
       <Header />
-      <ConnectWallet account={account} isCorrectNetwork={isCorrectNetwork} connectWalletHandler={connectWalletHandler} />
-      <Pagination nftsPerPage={nftsPerPage} totalNfts={currentNFTs.length} paginate={handlePagination} currentPage={currentPage} />
-      <div className="filter-buttons">
-        <button onClick={handleShowAllNFTs}>Show All NFTs</button>
-        <button onClick={handleShowForSaleNFTs}>Show NFTs For Sale</button>
-        <button onClick={handleShowOwnedNFTs}>Show Owned NFTs</button>
-      </div>
-      <NFTList
-        nfts={displayedNFTs}
-        loading={loading}
-        account={account}
-        makeOffer={makeOffer}
-        transferNFT={transferNFT}
-        listNFTForSale={listNFTForSale}
-        cancelSale={cancelSale}
-        buyNFT={buyNFT}
-      />
-      <Pagination nftsPerPage={nftsPerPage} totalNfts={currentNFTs.length} paginate={handlePagination} currentPage={currentPage} />
+      {!account && (
+        <div className="hero-image-container">
+          <img src="/hero.png" alt="Hero" className="hero-image" />
+        </div>
+      )}
+      <ConnectWallet />
+      {account && (
+        <>
+          {currentNFTs.length > nftsPerPage && (
+            <Pagination
+              nftsPerPage={nftsPerPage}
+              totalNfts={currentNFTs.length}
+              paginate={handlePagination}
+              currentPage={currentPage}
+            />
+          )}
+          <div className="filter-buttons">
+            <button onClick={handleShowAllNFTs}>Show All NFTs</button>
+            <button onClick={handleShowForSaleNFTs}>Show NFTs For Sale</button>
+            <button onClick={handleShowOwnedNFTs}>Show Owned NFTs</button>
+          </div>
+          <NFTList
+            nfts={displayedNFTs}
+            loading={loading}
+            account={account}
+            makeOffer={makeOffer}
+            transferNFT={transferNFT}
+            listNFTForSale={listNFTForSale}
+            cancelSale={cancelSale}
+            buyNFT={buyNFT}
+          />
+          {currentNFTs.length > nftsPerPage && (
+            <Pagination
+              nftsPerPage={nftsPerPage}
+              totalNfts={currentNFTs.length}
+              paginate={handlePagination}
+              currentPage={currentPage}
+            />
+          )}
+        </>
+      )}
       <Footer />
     </div>
   );

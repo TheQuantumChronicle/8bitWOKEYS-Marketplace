@@ -33,9 +33,9 @@ const Pagination = ({ nftsPerPage, totalNfts, paginate, currentPage }) => {
   };
 
   return (
-    <nav>
+    <nav className="pagination-container">
       <ul className="pagination">
-        {currentPage !== 1 && (
+        {currentPage !== 1 && pageNumbers.length > 1 && (
           <li className="page-item">
             <a onClick={() => paginate(currentPage - 1)} href="!#" className="page-link">
               Previous
@@ -43,7 +43,7 @@ const Pagination = ({ nftsPerPage, totalNfts, paginate, currentPage }) => {
           </li>
         )}
         {renderPageNumbers()}
-        {currentPage !== pageNumbers.length && (
+        {currentPage !== pageNumbers.length && pageNumbers.length > 1 && (
           <li className="page-item">
             <a onClick={() => paginate(currentPage + 1)} href="!#" className="page-link">
               Next

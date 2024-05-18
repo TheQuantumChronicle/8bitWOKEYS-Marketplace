@@ -504,7 +504,7 @@ body {
 .pagination-container {
     display: flex;
     justify-content: center;
-    margin: 10px 0;
+    margin: 20px 0;
 }
 
 .pagination {
@@ -524,12 +524,20 @@ body {
     color: #ff4500; /* Magma color for text */
     cursor: pointer;
     border-radius: 5px; /* Rounded corners for a modern look */
+    font-weight: bold;
 }
   
 .page-link:hover {
     background-color: #ff4500; /* Magma color for hover */
     color: #000000;
     outline: none;
+}
+
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 /* Special styles for NFTs with offers and those for sale */
@@ -541,4 +549,16 @@ body {
 .nft-item.for-sale {
     border: 2px solid #ff002b;
     box-shadow: 0 0 25px #00ff00c9;
+}
+
+/* Connect Wallet Specific Styles */
+.connect-wallet {
+    margin-top: 20px;
+}
+
+.connect-message {
+    margin-top: 10px;
+    color: #ff4500; /* Magma color */
+    font-size: 1.2rem;
+    animation: pulse-glow 2s infinite;
 }

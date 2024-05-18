@@ -18,11 +18,12 @@ const NFTList = ({ nfts, loading, account, makeOffer, transferNFT, listNFTForSal
         listNFTForSale={listNFTForSale}
         cancelSale={cancelSale}
         transferNFT={transferNFT}
+        loading={nft.loading}
       />
     ));
   }, [nfts, account, makeOffer, buyNFT, listNFTForSale, cancelSale, transferNFT]);
 
-  if (loading) {
+  if (loading && (!nfts || nfts.length === 0)) {
     return <p>Loading...</p>;
   }
 
@@ -32,9 +33,13 @@ const NFTList = ({ nfts, loading, account, makeOffer, transferNFT, listNFTForSal
 
   return (
     <div className="nft-list">
-      <Pagination nftsPerPage={nftsPerPage} totalNfts={totalNfts} paginate={paginate} currentPage={currentPage} />
+      {totalNfts > nftsPerPage && (
+        <Pagination nftsPerPage={nftsPerPage} totalNfts={totalNfts} paginate={paginate} currentPage={currentPage} />
+      )}
       {memoizedNFTItems}
-      <Pagination nftsPerPage={nftsPerPage} totalNfts={totalNfts} paginate={paginate} currentPage={currentPage} />
+      {totalNfts > nftsPerPage && (
+        <Pagination nftsPerPage={nftsPerPage} totalNfts={totalNfts} paginate={paginate} currentPage={currentPage} />
+      )}
     </div>
   );
 };

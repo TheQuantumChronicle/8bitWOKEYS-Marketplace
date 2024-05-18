@@ -21,6 +21,7 @@ export const useBlockchain = () => {
   const [displayNFTs, setDisplayNFTs] = useState([]);
   const [section, setSection] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const provider = useMemo(() => new ethers.providers.Web3Provider(window.ethereum), []);
   const nftContract = useMemo(() => new ethers.Contract(NFT_CONTRACT_ADDRESS, nftContractABI, provider), [provider]);
@@ -39,15 +40,15 @@ export const useBlockchain = () => {
       }
     } catch (networkError) {
       console.error('Error checking network:', networkError);
-      notifyError(networkError.message, 'networkError');
+      setError(networkError.message);
       setIsCorrectNetwork(false);
     }
-  }, [provider, notifyError]);
+  }, [provider]);
 
   const connectWalletHandler = useCallback(async () => {
-    setLoading(true);
-    if (window.ethereum) {
-      try {
+    setIsConnecting(true);
+    try {
+      if (window.ethereum) {
         await window.ethereum.request({ method: "eth_requestAccounts" });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
@@ -55,17 +56,16 @@ export const useBlockchain = () => {
         setAccount(address);
         notifySuccess('Wallet connected successfully!', 'walletConnect');
         checkNetwork();
-      } catch (connectError) {
-        notifyError(`Error connecting to wallet: ${connectError.message}`, 'connectError');
-        console.error('Error connecting to wallet:', connectError);
-      } finally {
-        setLoading(false);
+      } else {
+        throw new Error("Please install MetaMask!");
       }
-    } else {
-      notifyError("Please install MetaMask!", 'installMetaMask');
-      setLoading(false);
+    } catch (connectError) {
+      console.error('Error connecting to wallet:', connectError);
+      setError(`Error connecting to wallet: ${connectError.message}`);
+    } finally {
+      setIsConnecting(false);
     }
-  }, [notifySuccess, checkNetwork, notifyError]);
+  }, [checkNetwork, notifySuccess]);
 
   const fetchMetadata = useCallback(async (tokenId) => {
     const id = tokenId.toString();
@@ -86,10 +86,10 @@ export const useBlockchain = () => {
       return newMetadata;
     } catch (metadataError) {
       console.error(`Error fetching metadata for tokenId ${id}:`, metadataError);
-      notifyError(`Error fetching metadata for tokenId ${id}: ${metadataError.message}`, `metadataError_${id}`);
+      setError(`Error fetching metadata for tokenId ${id}: ${metadataError.message}`);
       return null;
     }
-  }, [metadata, setMetadata, nftContract, notifyError]);
+  }, [metadata, nftContract]);
 
   const addUniqueNFTs = useCallback((nfts) => {
     setCurrentNFTs(prev => {
@@ -127,15 +127,10 @@ export const useBlockchain = () => {
       addUniqueNFTs(validNFTs);
     } catch (loadDataError) {
       console.error('Error loading blockchain data:', loadDataError);
-      setError(`Failed to load blockchain data: ${loadDataError.message}`);
-      notifyError(`Error encountered: ${loadDataError.message}`, 'loadDataError');
-      if (loadDataError.message.includes("Incorrect network")) {
-        notifyError("You're on the wrong network. Please switch to the Magma Testnet.", 'networkError');
-      }
     } finally {
       setLoading(false);
     }
-  }, [provider, nftContract, notifyError, fetchMetadata, addUniqueNFTs, checkNetwork]);
+  }, [provider, nftContract, fetchMetadata, addUniqueNFTs, checkNetwork]);
 
   const fetchAllNFTs = useCallback(async () => {
     setLoading(true);
@@ -160,11 +155,11 @@ export const useBlockchain = () => {
       addUniqueNFTs(nftsWithOwnership);
     } catch (fetchAllNFTsError) {
       console.error("Failed to fetch NFTs:", fetchAllNFTsError);
-      notifyError(`Failed to fetch NFTs: ${fetchAllNFTsError.message}`, 'fetchAllNFTsError');
+      setError(`Failed to fetch NFTs: ${fetchAllNFTsError.message}`);
     } finally {
       setLoading(false);
     }
-  }, [nftContract, fetchMetadata, account, addUniqueNFTs, notifyError]);
+  }, [nftContract, fetchMetadata, account, addUniqueNFTs]);
 
   const fetchOwnedNFTs = useCallback(async () => {
     if (account && nftContract) {
@@ -173,15 +168,15 @@ export const useBlockchain = () => {
         return tokens.map(tokenId => ({ tokenId: tokenId.toString(), isOwner: true, isListedForSale: false }));
       } catch (fetchOwnedError) {
         console.error('Error fetching owned NFTs:', fetchOwnedError);
-        notifyError('Failed to fetch owned NFTs', 'fetchOwnedError');
+        setError('Failed to fetch owned NFTs');
         return []; // Return an empty array on error
       }
     }
-  }, [account, nftContract, notifyError]);
+  }, [account, nftContract]);
 
   const transferNFT = useCallback(async (tokenId, toAddress) => {
     if (!account || !nftContract) {
-      notifyError("Wallet or NFT Contract not available.", 'transferNFTError');
+      setError("Wallet or NFT Contract not available.");
       return null;
     }
 
@@ -195,10 +190,10 @@ export const useBlockchain = () => {
       return tx;
     } catch (transferNFTError) {
       console.error('Transfer NFT failed:', transferNFTError);
-      notifyError(`Transfer failed: ${transferNFTError.message}`, 'transferNFTError');
+      setError(`Transfer failed: ${transferNFTError.message}`);
       return null;
     }
-  }, [account, nftContract, notifyError, notifySuccess, provider, fetchOwnedNFTs]);
+  }, [account, nftContract, notifySuccess, provider, fetchOwnedNFTs]);
 
   const fetchForSaleNFTs = useCallback(async () => {
     setLoading(true);
@@ -232,11 +227,11 @@ export const useBlockchain = () => {
       setForSaleNFTs(validNFTs);
     } catch (fetchForSaleError) {
       console.error('Error fetching NFTs for sale:', fetchForSaleError);
-      notifyError(`Failed to fetch NFTs for sale: ${fetchForSaleError.message}`, 'fetchForSaleError');
+      setError(`Failed to fetch NFTs for sale: ${fetchForSaleError.message}`);
     } finally {
       setLoading(false);
     }
-  }, [marketContract, notifyError, fetchMetadata, addUniqueNFTs]);
+  }, [marketContract, fetchMetadata, addUniqueNFTs]);
 
   const fetchRecentlySoldNFTs = useCallback(async () => {
     setLoading(true);
@@ -259,12 +254,12 @@ export const useBlockchain = () => {
       return validNFTs;
     } catch (error) {
       console.error('Error fetching recently sold NFTs:', error);
-      notifyError(`Failed to fetch recently sold NFTs: ${error.message}`, 'fetchRecentlySoldError');
+      setError(`Failed to fetch recently sold NFTs: ${error.message}`);
       return [];
     } finally {
       setLoading(false);
     }
-  }, [marketContract, fetchMetadata, notifyError]);
+  }, [marketContract, fetchMetadata]);
 
   useEffect(() => {
     if (window.ethereum && !account && !loading) {
@@ -314,8 +309,6 @@ export const useBlockchain = () => {
     const contract = new ethers.Contract(MARKET_CONTRACT_ADDRESS, marketContractABI, provider.getSigner());
     const saleCancelledHandler = (tokenId, seller) => {
       setForSaleNFTs(currentNFTs => currentNFTs.filter(nft => nft.tokenId !== tokenId));
-      // Remove or comment out the following line to prevent the redundant toast message
-      // toast.info(`Sale cancelled for token ${tokenId}`, { toastId: `cancelSale_${tokenId}` });
     };
 
     contract.on("NFTSaleCancelled", saleCancelledHandler);
@@ -361,6 +354,7 @@ export const useBlockchain = () => {
     currentPage,
     nftContract,
     NFT_CONTRACT_ADDRESS,
-    MARKET_CONTRACT_ADDRESS
+    MARKET_CONTRACT_ADDRESS,
+    isConnecting, // Expose isConnecting state
   };
 };

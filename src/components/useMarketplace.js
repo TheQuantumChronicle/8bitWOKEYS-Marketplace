@@ -116,7 +116,7 @@ export const useMarketplace = () => {
       await fetchUpdatedData();
       return txResponse;
     } catch (error) {
-      notifyError(`Failed to list NFT for sale: ${error.message}`);
+      notifyError(`Failed to list NFT for sale`);
       return null;
     } finally {
       setLoading(false);
@@ -146,7 +146,7 @@ export const useMarketplace = () => {
       await fetchUpdatedData();
       return txResponse;
     } catch (error) {
-      notifyError(`Failed to cancel sale: ${error.message}`);
+      notifyError(`Failed to cancel sale`);
       return null;
     } finally {
       setLoading(false);
@@ -208,7 +208,7 @@ export const useMarketplace = () => {
       if (error.code === 'ACTION_REJECTED') {
         notifyError('Transaction rejected.');
       } else {
-        notifyError(`Error making offer: ${error.message}`);
+        notifyError(`Error making offer`);
       }
       return null;
     } finally {
@@ -237,7 +237,7 @@ export const useMarketplace = () => {
       if (error.code === 'ACTION_REJECTED') {
         notifyError('Transaction rejected.');
       } else {
-        notifyError(`Error in transaction: ${error.message}`);
+        notifyError(`Error in transaction`);
       }
       return null;
     } finally {
@@ -261,7 +261,7 @@ export const useMarketplace = () => {
       if (error.code === 'ACTION_REJECTED') {
         notifyError('Transaction rejected.');
       } else {
-        notifyError(`Failed to cancel offer: ${error.message}`);
+        notifyError(`Failed to cancel offer`);
       }
       return null;
     } finally {
@@ -294,7 +294,7 @@ export const useMarketplace = () => {
       if (error.code === 'ACTION_REJECTED') {
         notifyError('Transaction rejected.');
       } else {
-        notifyError(`Error purchasing NFT: ${error.message}`);
+        notifyError(`Error purchasing NFT`);
       }
       return null;
     } finally {
@@ -324,7 +324,7 @@ export const useMarketplace = () => {
       if (error.code === 'ACTION_REJECTED') {
         notifyError('Transaction rejected.');
       } else {
-        notifyError(`Transfer failed: ${error.message}`);
+        notifyError(`Transfer failed`);
       }
       return null;
     }
@@ -385,7 +385,7 @@ export const useMarketplace = () => {
     fetchIsListedForSale,
     fetchUpdatedData,
     forSaleNFTs,
-    sortNFTsByPrice, // Include sorting function
+    sortNFTsByPrice,
     loading,
     setLoading
   };
