@@ -37,30 +37,21 @@ function App() {
     buyNFT
   } = useMarketplace();
 
-  const [sortOrder, setSortOrder] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [nftsPerPage] = useState(25);
 
-  const sortedNFTs = useMemo(() => {
-    return currentNFTs.slice().sort((a, b) => {
-      if (sortOrder === 'highestToLowest') {
-        return parseFloat(b.price || 0) - parseFloat(a.price || 0);
-      } else if (sortOrder === 'lowestToHighest') {
-        return parseFloat(a.price || 0) - parseFloat(b.price || 0);
-      } else {
-        return 0;
-      }
-    });
-  }, [currentNFTs, sortOrder]);
-
   const displayedNFTs = useMemo(() => {
     const startIndex = (currentPage - 1) * nftsPerPage;
-    return sortedNFTs.slice(startIndex, startIndex + nftsPerPage);
-  }, [sortedNFTs, currentPage, nftsPerPage]);
+    return currentNFTs.slice(startIndex, startIndex + nftsPerPage);
+  }, [currentNFTs, currentPage, nftsPerPage]);
 
   useEffect(() => {
     setDisplayNFTs(displayedNFTs);
   }, [displayedNFTs, setDisplayNFTs]);
+
+  useEffect(() => {
+    document.title = "8bit Wokeys Marketplace";
+  }, []);
 
   const handlePagination = useCallback((pageNumber) => {
     setCurrentPage(pageNumber);
@@ -191,10 +182,6 @@ function App() {
     }
   }, [fetchOwnedNFTs, account, fetchMetadata, fetchIsListedForSale, handlePagination, setCurrentNFTs, setDisplayNFTs, setLoading, loading, isCorrectNetwork, notifyError]);
 
-  const handleSortOrderChange = (e) => {
-    setSortOrder(e.target.value);
-  };
-
   useEffect(() => {
     if (window.ethereum && !account && !loading) {
       connectWalletHandler();
@@ -219,10 +206,6 @@ function App() {
         <button onClick={handleShowAllNFTs}>Show All NFTs</button>
         <button onClick={handleShowForSaleNFTs}>Show NFTs For Sale</button>
         <button onClick={handleShowOwnedNFTs}>Show Owned NFTs</button>
-        <select onChange={handleSortOrderChange} value={sortOrder}>
-          <option value="highestToLowest">Highest Price to Lowest</option>
-          <option value="lowestToHighest">Lowest Price to Highest</option>
-        </select>
       </div>
       <NFTList
         nfts={displayedNFTs}

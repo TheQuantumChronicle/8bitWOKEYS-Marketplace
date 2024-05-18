@@ -187,11 +187,6 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
         {metadata.attributes.map((attribute, index) => (
           <div key={index} className="attribute">{attribute.trait_type}: {attribute.value}</div>
         ))}
-        {isListed && (
-          <p className="price" style={{ color: 'red', fontWeight: 'bold' }}>
-            Sale Price: {listPrice} ETH
-          </p>
-        )}
       </div>
       <div className="actions">
         {isOwner ? (
