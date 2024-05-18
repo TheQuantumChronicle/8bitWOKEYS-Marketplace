@@ -41,6 +41,7 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
       const receipt = await tx.wait();
       if (receipt.status === 1) {
         setMessage(successMessage);
+        fetchHighestOffer(tokenId);  // Update the highest offer immediately
         return true;
       } else {
         throw new Error("Transaction failed");
@@ -102,14 +103,11 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
       return;
     }
 
-    const success = await handleTransaction(
+    await handleTransaction(
       () => makeOffer(tokenId, parsedAmount.toString()),
       'Offer made successfully!',
       'Error making offer'
     );
-    if (success) {
-      fetchHighestOffer(tokenId); // Fetch the updated highest offer
-    }
   };
 
   const handleAcceptOffer = async () => {
@@ -173,15 +171,10 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
     <div className={itemClassName}>
       {currentOffer && currentOffer.amount && currentOffer.amount.gt(0) && (
         <p className="highest-offer" style={{ fontWeight: 'bold' }}>
-          Highest Offer: {ethers.utils.formatEther(currentOffer.amount)} ETH
+          Highest Offer: <span style={{ color: 'red' }}>{ethers.utils.formatEther(currentOffer.amount)} LAVA</span>
         </p>
       )}
       {isOwner && <p className="owned-message" style={{ color: 'red', fontSize: '1.2em', fontWeight: 'bold' }}>You own this NFT</p>}
-      {isListed && (
-        <p className="sale-price" style={{ fontWeight: 'bold' }}>
-          Sale Price: {price} ETH
-        </p>
-      )}
       <a href={`https://magmascan.org/token/0xA4F77aE2f6E33d1F4B6470BfAbF0fbD924525De1/instance/${tokenId}`} target="_blank" rel="noopener noreferrer">
         <img src={imageUrl} alt={`NFT ${tokenId}: ${metadata?.name || 'NFT'}`} className="nft-image" onError={(e) => e.target.src = 'path_to_default_image.png'} />
       </a>
@@ -226,7 +219,7 @@ function NFTItem({ tokenId, metadata, isListedForSale, price, isOwner, account, 
           </>
         ) : isListed ? (
           <>
-            <button onClick={handleBuyNow} disabled={marketplaceLoading}>Buy Now for <span className="price-highlight">{listPrice} ETH</span></button>
+            <button onClick={handleBuyNow} disabled={marketplaceLoading}>Buy Now for <span className="price-highlight" style={{ color: 'red' }}>{listPrice} LAVA</span></button>
             <form onSubmit={handleMakeOffer}>
               <input type="text" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} placeholder="Enter offer amount" disabled={marketplaceLoading} />
               <button type="submit" disabled={marketplaceLoading}>Make Offer</button>
