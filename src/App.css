@@ -8,10 +8,28 @@
     padding: 0;
 }
 
+.network-error {
+    color: #ff4d4f;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 18px;
+    background-color: #fff3f3;
+    padding: 10px;
+    border: 1px solid #ff4d4f;
+    border-radius: 5px;
+}
+
 body {
     background: #121212; /* Dark background for contrast */
     font-family: 'Roboto Mono', monospace; /* Consistent monospace font */
     color: #ffffff; /* Bright text for readability */
+    display: flex; /* Enable flexbox layout */
+    flex-direction: column; /* Arrange children in a column */
+    align-items: center; /* Center content horizontally */
+    justify-content: center; /* Center content vertically */
+    text-align: center; /* Center align text */
+    padding: 1rem; /* Add some padding for spacing */
+    font-size: 0.9rem; /* Slightly smaller font size for readability */
 }
 
 /* App Styles */
@@ -70,7 +88,7 @@ body {
     border-radius: 15px; /* Optional: if you want rounded corners */
     overflow: hidden; /* Ensures the overlay conforms to the border-radius */
     padding-top: 20px;
-  }
+}
   
 /* Pseudo-element for overlay */
 .hero-image-container::after {
@@ -311,11 +329,34 @@ body {
       0 0 15px #ff4500;
 }
 
-.nft-image {
-    max-width: 100%; /* Ensure images are responsive */
-    height: auto; /* Maintain aspect ratio */
-    margin-bottom: 1rem; /* Space below the image */
-    cursor: pointer;
+.nft-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+@keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500, 0 0 30px #ff4500;
+    }
+    50% {
+      box-shadow: 0 0 20px #ff4500, 0 0 40px #ff4500, 0 0 60px #ff4500;
+    }
+    100% {
+      box-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500, 0 0 30px #ff4500;
+    }
+}
+  
+.nft-item.owned {
+    border: 2px solid #ff4500; /* Red border for owned NFTs */
+    animation: pulse-glow 2s infinite; /* Apply pulsing glow effect */
+}
+
+.ownership-message {
+    color: #ff4500; /* Red color for the message */
+    font-weight: bold;
+    margin-top: 10px; /* Add some spacing above the message */
 }
 
 .metadata {
@@ -323,6 +364,24 @@ body {
     text-align: center; /* Align text to the left for readability */
     color: #ffffff; /* Adjust for better readability */
     overflow: hidden; /* Ensures text doesn't overflow */
+}
+
+.actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sale-price, .highest-offer {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.price-highlight {
+    color: #ff4500; /* Magma color */
+    font-weight: bold;
 }
 
 .no-nfts-container {
@@ -354,7 +413,6 @@ body {
     background-color: #ff4500;
     color: #000000;
 }
-
 
 .loader {
     border: 5px solid #f3f3f3; /* Light grey */
@@ -441,4 +499,46 @@ body {
   /* Style for link separators */
 .link-separator {
     color: #ffffff; /* Adjust color as needed */
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page-link {
+    padding: 5px 10px;
+    border: 1px solid #ff4500; /* Magma color for borders */
+    background-color: transparent; /* Style background consistently */
+    color: #ff4500; /* Magma color for text */
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners for a modern look */
+}
+  
+.page-link:hover {
+    background-color: #ff4500; /* Magma color for hover */
+    color: #000000;
+    outline: none;
+}
+
+/* Special styles for NFTs with offers and those for sale */
+.nft-item.has-offer {
+    border: 2px solid #ff002b;
+    box-shadow: 0 0 25px #ffd900dc;
+}
+
+.nft-item.for-sale {
+    border: 2px solid #ff002b;
+    box-shadow: 0 0 25px #00ff00c9;
 }
